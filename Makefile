@@ -35,7 +35,6 @@ uninstall:
 clean: clean_exec clean_obj clean_gcov clean_lcov clean_lcov_report clean_dist
 	@rm -rf views/.DS_Store \
         views/.qtc_clangd \
-        views/3d_viewer_c.app/ \
         views/3d_viewer_v2.pro.user.4f59a73 \
         views/moc_main_window.cpp \
         views/moc_predefs.h 
