@@ -22,14 +22,14 @@ endif
 all: install run
 
 run:
-	$(RUN_COMMAND) ../build/$(RESULT)  
+	$(RUN_COMMAND) build/$(RESULT)  
 
 install:
-	mkdir -p ../build
+	mkdir -p build
 	cd views && qmake && make &> /dev/null && make clean &> /dev/null && rm -f Makefile
 
 uninstall: 
-	@rm -rf ../build/$(RESULT)
+	@rm -rf build/$(RESULT)
 	@echo "uninstalled"
 
 clean: clean_exec clean_obj clean_gcov clean_lcov clean_lcov_report clean_dist
@@ -37,7 +37,10 @@ clean: clean_exec clean_obj clean_gcov clean_lcov clean_lcov_report clean_dist
         views/.qtc_clangd \
         views/3d_viewer_v2.pro.user.4f59a73 \
         views/moc_main_window.cpp \
-        views/moc_predefs.h 
+        views/moc_predefs.h \
+				views/.qmake.stash \
+				views/3d_viewer_c.app
+			
 	@echo "Clean finished"
 
 dvi:
