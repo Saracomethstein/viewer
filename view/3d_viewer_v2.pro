@@ -14,8 +14,8 @@ TARGET = 3d_viewer_cpp
 # DESTDIR = ../../build
 
 SOURCES += \
-    ../backend/model.cc \
-    ../backend/obj_parser.cc \
+    ../backend/model.c \
+    ../backend/obj_parser.c \
     main_window.cc \
     widget.cc \
     main.cc 

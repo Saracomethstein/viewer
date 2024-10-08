@@ -1,13 +1,13 @@
-CPP=g++
-CPPFLAGS=-Wall -Wextra -Werror -std=c++17
+CPP=gcc
+CPPFLAGS=-Wall -Wextra -Werror
 DIR?=../build
 TESTS_DIR=tests
 DIST_DIR=archive
 
-MAIN_PROJECT=$(shell find . -type f -name '*.cc' -o -name '*.h') # list of all the CPP source files in the project
+MAIN_PROJECT=$(shell find . -type f -name '*.c' -o -name '*.h') 
 SOURCES=$(filter-out ./qtgifimage/% , $(MAIN_PROJECT))
 TEST_SOURCES=$(filter-out ./view/% %.h, $(MAIN_PROJECT))
-TEST_OBJECTS=$(TEST_SOURCES:.cc=.o)
+TEST_OBJECTS=$(TEST_SOURCES:.c=.o)
 TEST=$(TESTS_DIR)/test
 
 .PHONY: all clean install uninstall tests gcov_report clang dvi dist run git
@@ -75,11 +75,6 @@ clang:
 
 valgrind: tests
 	CK_FORK=no valgrind --vgdb=no --leak-check=full --show-leak-kinds=all --track-origins=yes --verbose --read-var-info=yes $(TEST)
-
-git:
-	git add .
-	git commit
-	git push origin develop
 
 clean: clean_dist
 	@rm -rf $(TEST) $(TEST_OBJECTS) gcov_report* *.gc* report/ *.o

@@ -1,32 +1,22 @@
-#ifndef CPP4_3DVIEWER_V_2_0_1_SRC_BACKEND_MODEL_H_
-#define CPP4_3DVIEWER_V_2_0_1_SRC_BACKEND_MODEL_H_
+#ifndef C_MODEL_H_
+#define C_MODEL_H_
 
-#include <string>
-#include <vector>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "obj_parser.h"
 
-namespace s21 {
+int LoadFromFile(ViewerModel* model, const char* filename);
+void Move(ViewerModel* model, int delta, char axis);
+void Rotate(ViewerModel* model, double angle, char axis);
+void Scale(ViewerModel* model, int scale);
 
-class ViewerModel {
- public:
-  bool LoadFromFile(const std::string& filename);
-  void Move(int delta, char axis);
-  void Rotate(double angle, char axis);
-  void Scale(int scale);
+const double* getVertices(const ViewerModel* model) { return model->vertices_; }
+const int* getFaces(const ViewerModel* model) { return model->faces_; }
+const char* getFilename(const ViewerModel* model) { return model->filename_; }
+size_t getVertexCount(const ViewerModel* model) { return model->vertices_size; }
+size_t getFaceCount(const ViewerModel* model) { return model->faces_size; }
 
-  const std::vector<double>& getVertices() const { return vertices_; }
-  const std::vector<int>& getFaces() const { return faces_; }
-  const std::string& getFilename() const { return filename_; }
-  size_t getVertexCount() const { return vertices_.size() / 3; }
-  size_t getFaceCount() const { return faces_.size(); }
-
- private:
-  std::vector<double> vertices_;
-  std::vector<int> faces_;
-  std::string filename_;
-};
-
-}  // namespace s21
-
-#endif  // CPP4_3DVIEWER_V_2_0_1_SRC_BACKEND_MODEL_H_
+#endif  // C_MODEL_H_

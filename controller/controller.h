@@ -1,40 +1,54 @@
-#ifndef CPP4_3DVIEWER_V_2_0_1_SRC_CONTROLLER_CONTROLLER_H_
-#define CPP4_3DVIEWER_V_2_0_1_SRC_CONTROLLER_CONTROLLER_H_
+#ifndef C_CONTROLLER_H_
+#define C_CONTROLLER_H_
 
 #include "../backend/model.h"
 
-namespace s21 {
+typedef struct {
+  bool (*LoadFromFile)(const char* filename);
+  void (*Move)(int delta, char axis);
+  void (*Rotate)(double angle, char axis);
+  void (*Scale)(int scale);
+  const double* (*getVertices)();
+  const int* (*getFaces)();
+  const char* (*getFilename)();
+  size_t (*getVertexCount)();
+  size_t (*getFaceCount)();
+} Controller;
 
-class Controller {
- public:
-  Controller() = default;
+bool Controller_LoadFromFile(Controller* controller, const char* filename) {
+  return controller->LoadFromFile(filename);
+}
 
-  bool LoadFromFile(const std::string& filename) {
-    return model_.LoadFromFile(filename);
-  }
+void Controller_Move(Controller* controller, int delta, char axis) {
+  controller->Move(delta, axis);
+}
 
-  void Move(int delta, char axis) { model_.Move(delta, axis); }
+void Controller_Rotate(Controller* controller, double angle, char axis) {
+  controller->Rotate(angle, axis);
+}
 
-  void Rotate(double angle, char axis) { model_.Rotate(angle, axis); }
+void Controller_Scale(Controller* controller, int scale) {
+  controller->Scale(scale);
+}
 
-  void Scale(int scale) { model_.Scale(scale); }
+const double* Controller_getVertices(Controller* controller) {
+  return controller->getVertices();
+}
 
-  const std::vector<double>& getVertices() const {
-    return model_.getVertices();
-  }
+const int* Controller_getFaces(Controller* controller) {
+  return controller->getFaces();
+}
 
-  const std::vector<int>& getFaces() const { return model_.getFaces(); }
+const char* Controller_getFilename(Controller* controller) {
+  return controller->getFilename();
+}
 
-  const std::string& getFilename() const { return model_.getFilename(); }
+size_t Controller_getVertexCount(Controller* controller) {
+  return controller->getVertexCount();
+}
 
-  size_t getVertexCount() const { return model_.getVertexCount(); }
+size_t Controller_getFaceCount(Controller* controller) {
+  return controller->getFaceCount();
+}
 
-  size_t getFaceCount() const { return model_.getFaceCount(); }
-
- private:
-  ViewerModel model_;
-};
-
-}  // namespace s21
-
-#endif  // CPP4_3DVIEWER_V_2_0_1_SRC_CONTROLLER_CONTROLLER_H_
+#endif  // C_CONTROLLER_H_
