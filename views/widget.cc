@@ -160,8 +160,6 @@ GLuint glView::createShaderProgram(const char* vertexSource,
   glAttachShader(shaderProgram, vertexShader);
   glAttachShader(shaderProgram, fragmentShader);
   glLinkProgram(shaderProgram);
-
-  // удаляем шейдеры после линковки тк они больше не нужны
   glDeleteShader(vertexShader);
   glDeleteShader(fragmentShader);
 

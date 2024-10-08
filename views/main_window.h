@@ -10,6 +10,8 @@
 #include <QScrollBar>
 #include <QSpacerItem>
 #include <QVBoxLayout>
+#include <QPushButton>
+#include <QScrollBar>
 
 #include "widget.h"
 
