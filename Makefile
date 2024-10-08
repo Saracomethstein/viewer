@@ -25,8 +25,8 @@ run:
 	$(RUN_COMMAND) build/$(RESULT)  
 
 install:
-	mkdir -p build
-	cd views && qmake && make &> /dev/null && make clean &> /dev/null && rm -f Makefile
+	@mkdir -p build
+	@cd views && qmake && make && mv 3d_viewer_c.app ../build/ &> /dev/null && make clean &> /dev/null && rm -f Makefile
 
 uninstall: 
 	@rm -rf build/$(RESULT)
@@ -39,6 +39,7 @@ clean: clean_exec clean_obj clean_gcov clean_lcov clean_lcov_report clean_dist
         views/moc_main_window.cpp \
         views/moc_predefs.h \
 				views/.qmake.stash \
+				build/3d_viewer_c.app \
 				views/3d_viewer_c.app
 			
 	@echo "Clean finished"
@@ -66,7 +67,7 @@ gcov_report:
 	make clean_gcov
 
 dist_unpack:
-	cd ../ && tar -xzvf archive.tar.gz
+	@cd ../ && tar -xzvf archive.tar.gz
 
 style_check:
 	@find .. -type f -name "*.c" -exec clang-format -n -style=Google {} \;
