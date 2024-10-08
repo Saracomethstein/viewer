@@ -133,8 +133,8 @@ void glView::cleanupGL() {
 
 void glView::ReinitializeOpenGL(QString fp) {
   file_path = fp;
-  free_dod(&dod);
-  parse_dot_obj_file(file_path.toStdString().c_str(), &dod);
+  free_obj_model(&dod);
+  parse(file_path.toStdString().c_str(), &dod);
   makeCurrent();
   cleanupGL();
   initializeGL();
@@ -171,13 +171,13 @@ GLuint glView::createShaderProgram(const char* vertexSource,
 void glView::MoveVertices(int delta, eCoord coord) {
   switch (coord) {
     case eCoord::X:
-      move_vertices(&dod, delta, MOVE_X);
+      move(&dod, delta, 'x');
       break;
     case eCoord::Y:
-      move_vertices(&dod, delta, MOVE_Y);
+      move(&dod, delta, 'y');
       break;
     case eCoord::Z:
-      move_vertices(&dod, delta, MOVE_Z);
+      move(&dod, delta, 'z');
       break;
   }
   FillVertices(vertices, &dod);
@@ -187,13 +187,13 @@ void glView::MoveVertices(int delta, eCoord coord) {
 void glView::RotateVertices(int delta, eCoord coord) {
   switch (coord) {
     case eCoord::X:
-      rotate_x(&dod, (double)delta);
+      rotate(&dod, (double)delta, 'x');
       break;
     case eCoord::Y:
-      rotate_y(&dod, (double)delta);
+      rotate(&dod, (double)delta, 'y');
       break;
     case eCoord::Z:
-      rotate_z(&dod, (double)delta);
+      rotate(&dod, (double)delta, 'z');
       break;
   }
   FillVertices(vertices, &dod);
@@ -201,7 +201,7 @@ void glView::RotateVertices(int delta, eCoord coord) {
 }
 
 void glView::ScaleVertices(int delta) {
-  scale_vertices(&dod, delta);
+  scale(&dod, delta);
   FillVertices(vertices, &dod);
   UpdateVertexCoordinates(vertices);
 }
@@ -211,6 +211,6 @@ glView::~glView() {
   vertexBuffer.destroy();
   indexBuffer.destroy();
   doneCurrent();
-  free_dod(&dod);
+  free_obj_model(&dod);
   if (texture != nullptr) delete texture;
 }

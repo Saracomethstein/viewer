@@ -1,7 +1,7 @@
 #include "parser.h"
 
-int parse(obj_model* parser) {
-  FILE* file = fopen(parser->filename_, "r");
+int parse(const char* filename, obj_model* parser) {
+  FILE* file = fopen(filename, "r");
   if (!file) {
     return false;
   }
@@ -74,4 +74,17 @@ void parse_face_line(const char* line, obj_model* parser) {
   }
 
   free(line_copy);
+}
+
+void free_obj_model(obj_model* parser) {
+  if (parser) {
+    if (parser->faces_) {
+      free(parser->faces_);
+      parser->faces_ = NULL;
+    }
+    if (parser->vertices_) {
+      free(parser->vertices_);
+      parser->vertices_ = NULL;
+    }
+  }
 }

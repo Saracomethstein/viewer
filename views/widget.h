@@ -47,8 +47,8 @@ class glView : public QOpenGLWidget, protected QOpenGLFunctions {
   void initializeGL() override;
   void paintGL() override;
   void setupVertexAttribs();
-  void FillVertices(QVector<QVector3D>& vertices, dot_obj_data* dod);
-  void FillIndices(QVector<GLuint>& indices, dot_obj_data* dod);
+  void FillVertices(QVector<QVector3D>& vertices, obj_model* dod);
+  void FillIndices(QVector<GLuint>& indices, obj_model* dod);
   void UpdateVertexCoordinates(const QVector<QVector3D>& vertices);
   void cleanupGL();
   void UpdateInfoText();

@@ -14,9 +14,10 @@ typedef struct {
   char* filename_;
 } obj_model;
 
-obj_model* getInstance();
-int parse(obj_model* parser);
+// obj_model* getInstance();
+int parse(const char* filename, obj_model* parser);
 void parse_vertex_line(const char* line, obj_model* parser);
 void parse_face_line(const char* line, obj_model* parser);
+void free_obj_model(obj_model* parser);
 
 #endif  // C_PARSER_H_
