@@ -18,8 +18,8 @@ void glView::initializeGL() {
   FillVertices(vertices, &dod);
   FillIndices(indices, &dod);
 
-  v_count = dod.v_count;
-  f_count = dod.f_count;
+  v_count = dod.vertices_size;
+  f_count = dod.faces_size;
 
   vertexBuffer.create();
   vertexBuffer.bind();
@@ -97,22 +97,22 @@ void glView::setupVertexAttribs() {
   vao.release();
 }
 
-void glView::FillVertices(QVector<QVector3D>& vertices, dot_obj_data* dod) {
+void glView::FillVertices(QVector<QVector3D>& vertices, obj_model* dod) {
   vertices.clear();
-  vertices.reserve((int)dod->v_count);
+  vertices.reserve((int)dod->vertices_size);
 
-  for (int i = 0; i < (int)dod->v_count * 3; i += 3) {
-    vertices.append(QVector3D(dod->vertices[i], dod->vertices[i + 1],
-                              dod->vertices[i + 2]));
+  for (int i = 0; i < (int)dod->vertices_size * 3; i += 3) {
+    vertices.append(QVector3D(dod->vertices_[i], dod->vertices_[i + 1],
+                              dod->vertices_[i + 2]));
   }
 }
 
-void glView::FillIndices(QVector<GLuint>& indices, dot_obj_data* dod) {
+void glView::FillIndices(QVector<GLuint>& indices, obj_model* dod) {
   indices.clear();
-  indices.reserve((int)dod->f_count);
+  indices.reserve((int)dod->faces_size);
 
-  for (int i = 0; i < (int)dod->f_count; i++) {
-    indices.append(static_cast<GLuint>(dod->faces[i]));
+  for (int i = 0; i < (int)dod->faces_size; i++) {
+    indices.append(static_cast<GLuint>(dod->faces_[i]));
   }
 }
 
@@ -171,13 +171,13 @@ GLuint glView::createShaderProgram(const char* vertexSource,
 void glView::MoveVertices(int delta, eCoord coord) {
   switch (coord) {
     case eCoord::X:
-      move(&dod, delta, 'x');
+      move_model(&dod, delta, 'x');
       break;
     case eCoord::Y:
-      move(&dod, delta, 'y');
+      move_model(&dod, delta, 'y');
       break;
     case eCoord::Z:
-      move(&dod, delta, 'z');
+      move_model(&dod, delta, 'z');
       break;
   }
   FillVertices(vertices, &dod);

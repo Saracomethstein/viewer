@@ -56,7 +56,7 @@ class glView : public QOpenGLWidget, protected QOpenGLFunctions {
   QOpenGLTexture* texture;
   int v_count;
   int f_count;
-  dot_obj_data dod;
+  obj_model dod;
   QString file_path, info_text;
   float line_size;
   float point_size;
