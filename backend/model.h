@@ -1,22 +1,18 @@
 #ifndef C_MODEL_H_
 #define C_MODEL_H_
 
+#include <math.h>
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "obj_parser.h"
+#include "parser.h"
 
-int LoadFromFile(ViewerModel* model, const char* filename);
-void Move(ViewerModel* model, int delta, char axis);
-void Rotate(ViewerModel* model, double angle, char axis);
-void Scale(ViewerModel* model, int scale);
-
-const double* getVertices(const ViewerModel* model) { return model->vertices_; }
-const int* getFaces(const ViewerModel* model) { return model->faces_; }
-const char* getFilename(const ViewerModel* model) { return model->filename_; }
-size_t getVertexCount(const ViewerModel* model) { return model->vertices_size; }
-size_t getFaceCount(const ViewerModel* model) { return model->faces_size; }
+void rotate(obj_model* model, double angle, char axis);
+void move(obj_model* model, int delta, char axis);
+void scale(obj_model* model, int scale);
+int load_from_file(obj_model* model);
 
 #endif  // C_MODEL_H_

@@ -1,11 +1,6 @@
-#include "obj_parser.h"
+#include "parser.h"
 
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-int Parse(ViewerModel* parser) {
+int parse(obj_model* parser) {
   FILE* file = fopen(parser->filename_, "r");
   if (!file) {
     return false;
@@ -19,9 +14,9 @@ int Parse(ViewerModel* parser) {
 
   while (fgets(line, sizeof(line), file)) {
     if (strncmp(line, "v ", 2) == 0) {
-      ParseVertexLine(line, parser);
+      parse_vertex_line(line, parser);
     } else if (strncmp(line, "f ", 2) == 0) {
-      ParseFaceLine(line, parser);
+      parse_face_line(line, parser);
     }
   }
 
@@ -29,7 +24,7 @@ int Parse(ViewerModel* parser) {
   return true;
 }
 
-void ParseVertexLine(const char* line, ViewerModel* parser) {
+void parse_vertex_line(const char* line, obj_model* parser) {
   double x, y, z;
   sscanf(line + 2, "%lf %lf %lf", &x, &y, &z);
 
@@ -41,7 +36,7 @@ void ParseVertexLine(const char* line, ViewerModel* parser) {
   parser->vertices_size += 3;
 }
 
-void ParseFaceLine(const char* line, ViewerModel* parser) {
+void parse_face_line(const char* line, obj_model* parser) {
   char* token;
   char* line_copy = strdup(line + 2);
   int first_index = -1, last_index = -1;

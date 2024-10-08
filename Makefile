@@ -1,51 +1,39 @@
-CPP=gcc
-CPPFLAGS=-Wall -Wextra -Werror
-DIR?=../build
-TESTS_DIR=tests
-DIST_DIR=archive
-
-MAIN_PROJECT=$(shell find . -type f -name '*.c' -o -name '*.h') 
-SOURCES=$(filter-out ./qtgifimage/% , $(MAIN_PROJECT))
-TEST_SOURCES=$(filter-out ./view/% %.h, $(MAIN_PROJECT))
-TEST_OBJECTS=$(TEST_SOURCES:.c=.o)
-TEST=$(TESTS_DIR)/test
-
-.PHONY: all clean install uninstall tests gcov_report clang dvi dist run git
+CC=gcc
+FLAGS=-Wall -Wextra -Werror -std=c11
+TEST_PARTS=./tests/*.c 
+GCOV_FLAGS= -fprofile-arcs -ftest-coverage
+SOURCES=./backend/*.c
+DIST_DIR=./archive
 
 OS := $(shell uname)
-ifeq ($(OS),Linux)
-	OPEN_COMMAND= xdg-open
-	OPEN= $(OPEN_COMMAND) report/index.html
-	RESULT=3d_viewer_cpp
+ifeq ($(OS), Linux)
+	OPEN_COMMAND=xdg-open
+	RESULT=3d_viewer_c
 	CHECK_LIB = -lcheck -lsubunit -lm -lrt -lpthread -D_GNU_SOURSE
-	CHECK_LIBCPP = -lgtest -lsubunit -lm -lrt -lpthread -D_GNU_SOURSE
 endif
 
-ifeq ($(OS),Darwin)
-	OPEN_COMMAND= open
-	OPEN= $(OPEN_COMMAND) report/index.html
-	RESULT= 3d_viewer_cpp.app
+ifeq ($(OS), Darwin)
+	RESULT=3d_viewer_c.app
+	RUN_COMMAND=open
+	OPEN_COMMAND=open
 	CHECK_LIB = -lcheck
-	CHECK_LIBCPP = -lgtest
 endif
 
 all: install run
 
-install:
-	@cd view && qmake && make
-	@mv view/$(RESULT) $(DIR)
-	@echo "Program Installed Successfully"
-
 run:
-	$(OPEN_COMMAND) ../build  
+	$(RUN_COMMAND) ../build/$(RESULT)  
 
-uninstall:
-	@rm -rf $(DIR)/$(RESULT)
-	@echo "Program Is Unistalled Successfully"
+install:
+	mkdir -p ../build
+	cd views && qmake && make &> /dev/null && make clean &> /dev/null && rm -f Makefile
 
-tests: $(TEST_OBJECTS) 
-	@$(CPP) $(CPPFLAGS) $^ -o $(TEST) $(CHECK_LIBCPP)
-	@./$(TEST)
+uninstall: 
+	@rm -rf ../build/$(RESULT)
+	@echo "uninstalled"
+
+clean: clean_exec clean_obj clean_gcov clean_lcov clean_lcov_report clean_dist
+	@echo "Clean finished"
 
 dvi:
 	$(OPEN_COMMAND) ../dvi/3d_viewer_c_about.html	
@@ -56,34 +44,48 @@ dist: clean_dist
 	cd ../ && tar -czvf archive.tar.gz ${DIST_DIR}
 	cd ../ && rm -rf ${DIST_DIR}
 
+test:
+	$(CC) ${FLAGS} $(TEST_PARTS) $(SOURCES) -o ./test.out $(CHECK_LIB)
+	./test.out
+
+gcov_report:
+	@mkdir -p report
+	$(CC) ${FLAGS} $(TEST_PARTS) $(SOURCES) -o ./gcov_report.out $(CHECK_LIB) $(GCOV_FLAGS) 
+	./gcov_report.out
+	lcov -t "test" -o test.info -c -d .
+	genhtml -o report/ test.info
+	${OPEN_COMMAND} ./report/index.html
+	make clean_gcov
+
 dist_unpack:
 	cd ../ && tar -xzvf archive.tar.gz
 
-.cc.o:
-	$(CPP) -c $(CPPFLAGS) $< -o $@
+style_check:
+	@find .. -type f -name "*.c" -exec clang-format -n -style=Google {} \;
+	@find .. -type f -name "*.h" -exec clang-format -n -style=Google {} \;
+	@echo "Clang format style check is finished"
 
-gcov_report: $(TEST_SOURCES) 
-	$(CPP) $(CPPFLAGS) --coverage $^ $(CHECK_LIBCPP) -o $@
-	chmod +x *
-	./$@ 
-	lcov -t  "$@" --ignore-errors inconsistent -o $@.info --no-external -c -d .
-	genhtml -o report/ $@.info
-	$(OPEN)
-
-clang:
-	clang-format -style=Google -n $(SOURCES)
-
-valgrind: tests
-	CK_FORK=no valgrind --vgdb=no --leak-check=full --show-leak-kinds=all --track-origins=yes --verbose --read-var-info=yes $(TEST)
-
-clean: clean_dist
-	@rm -rf $(TEST) $(TEST_OBJECTS) gcov_report* *.gc* report/ *.o
-	@make clean_desktop
-	@echo "Everything is cleaned"
-
-clean_desktop:
-	@cd view && make distclean && rm .qmake.stash && rm -rf build
+style:
+	@find .. -type f -name "*.c" -exec clang-format -i -style=Google {} \;
+	@find .. -type f -name "*.h" -exec clang-format -i -style=Google {} \;
+	@echo "Clang format style apply is finished"
 
 clean_dist:
 	@cd ../ && rm -rf archive
 	@cd ../ && rm -rf archive.tar.gz
+
+clean_exec:
+	@find .. -type f -name "*.out" -exec rm {} \;
+
+clean_obj:
+	@find .. -type f -name "*.o" -exec rm {} \;
+
+clean_gcov:
+	@find .. -type f -name "*.gcda" -exec rm {} \;
+	@find .. -type f -name "*.gcno" -exec rm {} \;
+
+clean_lcov:
+	@find .. -type f -name "*.info" -exec rm {} \;
+
+clean_lcov_report:
+	@rm -rf report
