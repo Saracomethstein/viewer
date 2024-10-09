@@ -21,14 +21,54 @@ extern "C" {
 
 class glView : public QOpenGLWidget, protected QOpenGLFunctions {
  public:
-  glView();
+  enum class ProjectionType { Perspective, Orthographic };
   enum class eCoord { X, Y, Z };
+  glView();
   void MoveVertices(int delta, eCoord coord);
   void RotateVertices(int delta, eCoord coord);
   void ScaleVertices(int delta);
-  void ReinitializeOpenGL(QString fp);
+  void ReinitializeOpenGL(QString& fp);
+  QColor GetBackgroundColor() const;
+
+  void SetBackgroundColor(QColor);
+
+  ProjectionType GetProjectionType() const;
+  void SetProjectionType(ProjectionType type);
   QString GetInfoText() const;
+  void Render(QPainter* painter);
   ~glView();
+
+  QColor GetEdgeColor() const { return edgeColor; }
+  void SetEdgeColor(const QColor& color) {
+    edgeColor = color;
+    update();
+  }
+  float GetEdgeWidth() const { return edgeWidth; }
+  void SetEdgeWidth(float width) {
+    edgeWidth = width;
+    update();
+  }
+  int GetEdgeType() const { return edgeType; }
+  void SetEdgeType(int type) {
+    edgeType = type;
+    update();
+  }
+
+  QColor GetVertexColor() const { return vertexColor; }
+  void SetVertexColor(const QColor& color) {
+    vertexColor = color;
+    update();
+  }
+  float GetVertexSize() const { return vertexSize; }
+  void SetVertexSize(float size) {
+    vertexSize = size;
+    update();
+  }
+  int GetVertexDisplayType() const { return vertexDisplayType; }
+  void SetVertexDisplayType(int type) {
+    vertexDisplayType = type;
+    update();
+  }
 
  private:
   QMatrix4x4 projectionMatrix;
@@ -60,8 +100,17 @@ class glView : public QOpenGLWidget, protected QOpenGLFunctions {
   QString file_path, info_text;
   float line_size;
   float point_size;
-  QColor line_color;
+
   QColor background_color;
+  ProjectionType currentProjectionType;
+
+  QColor edgeColor;
+  float edgeWidth;
+  int edgeType;
+
+  QColor vertexColor;
+  float vertexSize;
+  int vertexDisplayType;
 
   static const inline char* vertex_shader_source = R"(
     #version 120
@@ -73,12 +122,18 @@ class glView : public QOpenGLWidget, protected QOpenGLFunctions {
   )";
   static const inline char* fragment_shader_source = R"(
     #version 120
-    uniform vec3 lineColor;
-    void main() {
-        gl_FragColor = vec4(lineColor, 1.0);
-    }
-  )";
+    uniform vec3 edgeColor;
+    uniform vec3 vertexColor;
+    uniform int drawType; // 0 - ребра, 1 - вершины
 
+    void main() {
+        if (drawType == 0) {
+            gl_FragColor = vec4(edgeColor, 1.0);
+        } else if (drawType == 1) {
+            gl_FragColor = vec4(vertexColor, 1.0);
+        }
+    }
+)";
  private slots:
   void openFileDialog();
 };
