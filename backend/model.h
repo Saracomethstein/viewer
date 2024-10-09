@@ -10,9 +10,8 @@
 
 #include "parser.h"
 
-void rotate(obj_model* model, double angle, char axis);
+void rotate_model(obj_model* model, double angle, char axis);
 void move_model(obj_model* model, int delta, char axis);
-void scale(obj_model* model, int scale);
-int load_from_file(obj_model* model);
+void scale_model(obj_model* model, int scale);
 
 #endif  // C_MODEL_H_

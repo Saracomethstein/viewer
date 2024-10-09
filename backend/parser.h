@@ -14,11 +14,12 @@ typedef struct {
   char* filename_;
 } obj_model;
 
-enum MOVEMENT { MOVE_X, MOVE_Y, MOVE_Z };
+enum STATUS { OK, ERROR };
 
-int parse(const char* filename, obj_model* parser);
-void parse_vertex_line(const char* line, obj_model* parser);
-void parse_face_line(const char* line, obj_model* parser);
-void free_obj_model(obj_model* parser);
+int load_obj_file(const char* filename, obj_model* model);
+int parse_obj_file(FILE* file, obj_model* model);
+int allocate_memory_for_model(obj_model* model);
+void calculate_vertex_and_face_size(FILE* file, obj_model* model);
+void free_model(obj_model* model);
 
 #endif  // C_PARSER_H_

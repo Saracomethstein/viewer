@@ -5,9 +5,9 @@ glView::glView()
       indexBuffer(QOpenGLBuffer::IndexBuffer),
       line_size(1.0f),
       point_size(10.0f),
-      line_color(Qt::blue),
+      line_color(Qt::black),
       background_color(Qt::white) {
-  setFixedSize(640, 480);
+  setFixedSize(960, 540);  // 640, 480
 }
 
 void glView::initializeGL() {
@@ -44,7 +44,7 @@ void glView::initializeGL() {
 
   // Установка матрицы вида
   viewMatrix.setToIdentity();
-  viewMatrix.translate(0, 0, -4);  // start point of view
+  viewMatrix.translate(0, 0, -5);  // start point of view -4
 }
 
 void glView::paintGL() {
@@ -133,8 +133,8 @@ void glView::cleanupGL() {
 
 void glView::ReinitializeOpenGL(QString fp) {
   file_path = fp;
-  free_obj_model(&dod);
-  parse(file_path.toStdString().c_str(), &dod);
+  free_model(&dod);
+  load_obj_file(file_path.toStdString().c_str(), &dod);
   makeCurrent();
   cleanupGL();
   initializeGL();
@@ -185,13 +185,13 @@ void glView::MoveVertices(int delta, eCoord coord) {
 void glView::RotateVertices(int delta, eCoord coord) {
   switch (coord) {
     case eCoord::X:
-      rotate(&dod, (double)delta, 'x');
+      rotate_model(&dod, (double)delta, 'x');
       break;
     case eCoord::Y:
-      rotate(&dod, (double)delta, 'y');
+      rotate_model(&dod, (double)delta, 'y');
       break;
     case eCoord::Z:
-      rotate(&dod, (double)delta, 'z');
+      rotate_model(&dod, (double)delta, 'z');
       break;
   }
   FillVertices(vertices, &dod);
@@ -199,7 +199,7 @@ void glView::RotateVertices(int delta, eCoord coord) {
 }
 
 void glView::ScaleVertices(int delta) {
-  scale(&dod, delta);
+  scale_model(&dod, delta);
   FillVertices(vertices, &dod);
   UpdateVertexCoordinates(vertices);
 }
@@ -209,6 +209,6 @@ glView::~glView() {
   vertexBuffer.destroy();
   indexBuffer.destroy();
   doneCurrent();
-  free_obj_model(&dod);
+  free_model(&dod);
   if (texture != nullptr) delete texture;
 }

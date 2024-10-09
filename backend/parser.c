@@ -1,90 +1,141 @@
 #include "parser.h"
 
-int parse(const char* filename, obj_model* parser) {
+int load_obj_file(const char* filename, obj_model* model) {
+  if (!filename || !model) {
+    return ERROR;
+  }
+
+  int status = OK;
   FILE* file = fopen(filename, "r");
-  if (!file) {
-    return false;
+  if (file) {
+    calculate_vertex_and_face_size(file, model);
+    status = allocate_memory_for_model(model);
+    if (status != ERROR) {
+      fseek(file, 0, SEEK_SET);
+      status = parse_obj_file(file, model);
+    }
+    fclose(file);
+  } else {
+    status = ERROR;
   }
 
-  char line[256];
-  parser->vertices_size = 0;
-  parser->faces_size = 0;
-  parser->vertices_ = NULL;
-  parser->faces_ = NULL;
+  return status;
+}
 
-  while (fgets(line, sizeof(line), file)) {
+int parse_obj_file(FILE* file, obj_model* model) {
+  int status = OK;
+  char* line = NULL;
+  size_t len = 0;
+  size_t vertexIndex = 0;
+  size_t faceIndex = 0;
+
+  while (getline(&line, &len, file) != -1) {
     if (strncmp(line, "v ", 2) == 0) {
-      parse_vertex_line(line, parser);
+      double x, y, z;
+      sscanf(line, "v %lf %lf %lf", &x, &y, &z);
+      model->vertices_[vertexIndex * 3] = x;
+      model->vertices_[vertexIndex * 3 + 1] = y;
+      model->vertices_[vertexIndex * 3 + 2] = z;
+      vertexIndex++;
     } else if (strncmp(line, "f ", 2) == 0) {
-      parse_face_line(line, parser);
+      char* token = strtok(line + 2, " ");
+      int vertexIdx;
+      int firstVertex = -1;
+      int lastVertex = -1;
+
+      while (token != NULL) {
+        if (sscanf(token, "%d/%*d/%*d", &vertexIdx) == 1) {
+          if (vertexIdx < 0) {
+            vertexIdx += vertexIndex + 1;
+          }
+          vertexIdx--;
+
+          if (firstVertex == -1) {
+            firstVertex = vertexIdx;
+          }
+
+          if (lastVertex != -1) {
+            model->faces_[faceIndex++] = lastVertex;
+            model->faces_[faceIndex++] = vertexIdx;
+          }
+
+          lastVertex = vertexIdx;
+        }
+        token = strtok(NULL, " ");
+      }
+
+      if (firstVertex != -1 && lastVertex != -1) {
+        model->faces_[faceIndex++] = lastVertex;
+        model->faces_[faceIndex++] = firstVertex;
+      }
     }
   }
 
-  fclose(file);
-  return true;
-}
-
-void parse_vertex_line(const char* line, obj_model* parser) {
-  double x, y, z;
-  sscanf(line + 2, "%lf %lf %lf", &x, &y, &z);
-
-  parser->vertices_ =
-      realloc(parser->vertices_, (parser->vertices_size + 3) * sizeof(double));
-  (parser->vertices_)[parser->vertices_size] = x;
-  (parser->vertices_)[parser->vertices_size + 1] = y;
-  (parser->vertices_)[parser->vertices_size + 2] = z;
-  parser->vertices_size += 3;
-}
-
-void parse_face_line(const char* line, obj_model* parser) {
-  char* token;
-  char* line_copy = strdup(line + 2);
-  int first_index = -1, last_index = -1;
-
-  token = strtok(line_copy, " ");
-  while (token != NULL) {
-    int vertex_index = atoi(token) - 1;
-
-    if (vertex_index < 0) {
-      vertex_index += parser->vertices_size / 3;
-    }
-
-    if (first_index == -1) {
-      first_index = vertex_index;
-    }
-
-    if (last_index != -1) {
-      parser->faces_ =
-          realloc(parser->faces_, (parser->faces_size + 2) * sizeof(int));
-      (parser->faces_)[parser->faces_size] = last_index;
-      (parser->faces_)[parser->faces_size + 1] = vertex_index;
-      parser->faces_size += 2;
-    }
-
-    last_index = vertex_index;
-    token = strtok(NULL, " ");
+  if (line) {
+    free(line);
   }
 
-  if (first_index != -1 && last_index != -1) {
-    parser->faces_ =
-        realloc(parser->faces_, (parser->faces_size + 2) * sizeof(int));
-    (parser->faces_)[parser->faces_size] = last_index;
-    (parser->faces_)[parser->faces_size + 1] = first_index;
-    parser->faces_size += 2;
-  }
-
-  free(line_copy);
+  return status;
 }
 
-void free_obj_model(obj_model* parser) {
-  if (parser) {
-    if (parser->faces_) {
-      free(parser->faces_);
-      parser->faces_ = NULL;
+int allocate_memory_for_model(obj_model* model) {
+  int status = OK;
+  model->vertices_ = (double*)malloc(model->vertices_size * 3 * sizeof(double));
+  model->faces_ = (int*)malloc(model->faces_size * 2 * sizeof(int));
+
+  if (!model->vertices_ || !model->faces_) {
+    status = ERROR;
+  }
+  if (status == ERROR) {
+    if (model->vertices_) free(model->vertices_);
+    if (model->faces_) free(model->faces_);
+  }
+  return status;
+}
+
+void calculate_vertex_and_face_size(FILE* file, obj_model* model) {
+  size_t vertexCount = 0;
+  size_t faceCount = 0;
+  char* line = NULL;
+  size_t len = 0;
+
+  while (getline(&line, &len, file) != -1) {
+    line[strcspn(line, "\n")] = '\0';
+
+    if (line[0] == '#' || line[0] == '\0') {
+      continue;
     }
-    if (parser->vertices_) {
-      free(parser->vertices_);
-      parser->vertices_ = NULL;
+
+    if (strncmp(line, "v ", 2) == 0) {
+      vertexCount++;
+    } else if (strncmp(line, "f ", 2) == 0) {
+      size_t vertexInFace = 0;
+      char* token = strtok(line + 2, " ");
+
+      while (token != NULL) {
+        vertexInFace++;
+        token = strtok(NULL, " ");
+      }
+
+      faceCount += vertexInFace;
+    }
+  }
+
+  free(line);
+
+  model->vertices_size = vertexCount;
+  model->faces_size = faceCount * 2;
+}
+
+void free_model(obj_model* model) {
+  if (model) {
+    if (model->faces_) {
+      free(model->faces_);
+      model->faces_ = NULL;
+    }
+    if (model->vertices_) {
+      free(model->vertices_);
+      model->vertices_ = NULL;
     }
   }
 }

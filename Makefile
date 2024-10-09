@@ -41,7 +41,8 @@ clean: clean_exec clean_obj clean_gcov clean_lcov clean_lcov_report clean_dist
 				views/.qmake.stash \
 				build/3d_viewer_c.app \
 				views/3d_viewer_c.app \
-				views/Makefile
+				views/Makefile \
+				build/
 			
 	@echo "Clean finished"
 
