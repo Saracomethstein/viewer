@@ -37,12 +37,9 @@ void glView::initializeGL() {
   glClearColor(background_color.redF(), background_color.greenF(),
                background_color.blueF(), 0.0f);
   glEnable(GL_DEPTH_TEST);
-
-  // Установка матрицы проекции
   projectionMatrix.setToIdentity();
   projectionMatrix.perspective(45.0f, 3.0f / 3.0f, 0.1f, 100.0f);
 
-  // Установка матрицы вида
   viewMatrix.setToIdentity();
   viewMatrix.translate(0, 0, -5);  // start point of view -4
 }

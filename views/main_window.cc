@@ -51,7 +51,7 @@ MainWindow::MainWindow(QWidget *parent)
       prev_z_move(50),
       scale_val(5) {
   setWindowTitle("3d_viewer_c");
-  setFixedWidth(664);
+  setFixedWidth(980);
 
   slrotate_x->setValue(prev_x_rot);
   slrotate_y->setValue(prev_y_rot);
